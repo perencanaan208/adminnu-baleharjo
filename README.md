@@ -1,4 +1,3 @@
-[README (2).md](https://github.com/user-attachments/files/29693505/README.2.md)
 # Sistem Administrasi NU Baleharjo — Redirect Pendek (GitHub + Vercel)
 
 Repo ini **bukan** aplikasi baru. Isinya cuma konfigurasi *redirect* supaya
