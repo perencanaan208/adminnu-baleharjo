@@ -5,58 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sistem Administrasi NU Baleharjo</title>
 <meta name="robots" content="noindex, nofollow">
+<meta http-equiv="refresh" content="0; url=https://script.google.com/macros/s/AKfycbwSK9pZh5H18yFqpsTmY29GqoUIeE1HcRUzuVKt8o8OVfIyflLz8AT6jaWZ2bHWp-bUFQ/exec">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; width: 100%; overflow: hidden; background: #0f3d24; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
-
-  #app-frame { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; display: block; }
-
-  #loader {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: #0f3d24; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 16px; color: #fff; z-index: 10;
-    transition: opacity 0.3s ease;
-  }
-  #loader.hide { opacity: 0; pointer-events: none; }
+  html, body { height: 100%; width: 100%; background: #0f3d24; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: #fff; text-align: center; padding: 24px; }
   .spinner { width: 42px; height: 42px; border: 4px solid rgba(255,255,255,0.25); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  #loader p { font-size: 14px; opacity: 0.85; }
+  p { font-size: 14px; opacity: 0.85; }
+  a { color: #fff; }
 </style>
+<script>
+  window.location.replace("https://script.google.com/macros/s/AKfycbwSK9pZh5H18yFqpsTmY29GqoUIeE1HcRUzuVKt8o8OVfIyflLz8AT6jaWZ2bHWp-bUFQ/exec");
+</script>
 </head>
 <body>
-
-  <div id="loader">
-    <div class="spinner"></div>
-    <p id="loaderText">Memuat Sistem Administrasi NU Baleharjo...</p>
-  </div>
-
-  <iframe id="app-frame" title="Sistem Administrasi NU Baleharjo" allow="clipboard-write"></iframe>
-
-<script>
-  var GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwSK9pZh5H18yFqpsTmY29GqoUIeE1HcRUzuVKt8o8OVfIyflLz8AT6jaWZ2bHWp-bUFQ/exec";
-  var TIMEOUT_MS = 10000; // kalau belum kelar dalam 10 detik, otomatis reload
-
-  var frame = document.getElementById('app-frame');
-  var loader = document.getElementById('loader');
-  var loaderText = document.getElementById('loaderText');
-
-  frame.src = GAS_WEB_APP_URL;
-
-  var loaded = false;
-  frame.addEventListener('load', function () {
-    loaded = true;
-    loader.classList.add('hide');
-    setTimeout(function () { loader.style.display = 'none'; }, 350);
-  });
-
-  // Kalau gagal terhubung dalam batas waktu, coba lagi otomatis (reload halaman)
-  setTimeout(function () {
-    if (!loaded) {
-      loaderText.textContent = 'Menghubungkan ulang...';
-      setTimeout(function () { window.location.reload(); }, 600);
-    }
-  }, TIMEOUT_MS);
-</script>
-
+  <div class="spinner"></div>
+  <p>Mengalihkan ke Sistem Administrasi NU Baleharjo...</p>
+  <p><a href="https://script.google.com/macros/s/AKfycbwSK9pZh5H18yFqpsTmY29GqoUIeE1HcRUzuVKt8o8OVfIyflLz8AT6jaWZ2bHWp-bUFQ/exec">Klik di sini kalau tidak otomatis teralihkan</a></p>
 </body>
 </html>
