@@ -1,4 +1,9 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://script.google.com/macros/s/AKfycbwSK9pZh5H18yFqpsTmY29GqoUIeE1HcRUzuVKt8o8OVfIyflLz8AT6jaWZ2bHWp-bUFQ/exec",
+      "permanent": false
+    }
+  ]
 }
