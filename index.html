@@ -5,6 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sistem Administrasi NU Baleharjo</title>
 <meta name="robots" content="noindex, nofollow">
+<!--
+  Ikon aplikasi: favicon tab browser, ikon Home Screen iOS, dan ikon
+  "Buat Pintasan"/"Install" di Android & desktop Chrome. Href-nya SENGAJA
+  dikosongkan di sini — begitu halaman ini dimuat, script kecil di bawah
+  mengambil URL Icon Aplikasi (yang disimpan di Google Drive lewat menu
+  Pengaturan di dalam aplikasi) langsung dari server GAS, lalu mengisi
+  href-nya. Jadi kalau Admin ganti ikon lewat Pengaturan, ikon di sini
+  IKUT BERUBAH otomatis — TIDAK perlu commit/push apapun ke sini lagi.
+-->
+<link rel="icon" id="appFaviconLink" href="">
+<link rel="apple-touch-icon" id="appTouchIconLink" href="">
+<link rel="manifest" id="appManifestLink" href="">
+<meta name="theme-color" content="#0f3d24">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; width: 100%; overflow: hidden; background: #0f3d24; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
@@ -56,6 +69,42 @@
       setTimeout(function () { window.location.reload(); }, 600);
     }
   }, TIMEOUT_MS);
+
+  // ================= IKON APLIKASI (favicon & "Add to Home Screen") =================
+  // GET biasa (bukan POST) — dijamin tidak kena masalah CORS preflight sama
+  // sekali. Endpoint ?rpc=getIkon cuma mengembalikan JSON kecil berisi URL
+  // Icon Aplikasi terbaru (bukan file gambar), lihat doGet di Code.gs.
+  fetch(GAS_WEB_APP_URL + '?rpc=getIkon')
+    .then(function (r) { return r.json(); })
+    .then(function (res) {
+      var url = res && res.url;
+      if (!url) return; // belum ada ikon custom diupload — biarkan ikon bawaan browser
+
+      document.getElementById('appFaviconLink').setAttribute('href', url);
+      document.getElementById('appTouchIconLink').setAttribute('href', url);
+
+      // Web App Manifest dibuat dinamis lewat Blob URL (bukan file
+      // manifest.json terpisah) — supaya ikon "Add to Home Screen"/"Install
+      // App" di Android Chrome & desktop Chrome ikut memakai ikon terbaru.
+      var manifest = {
+        name: 'Sistem Administrasi NU Baleharjo',
+        short_name: 'SI ADMIN NU',
+        start_url: GAS_WEB_APP_URL,
+        display: 'standalone',
+        background_color: '#0f3d24',
+        theme_color: '#0f3d24',
+        icons: [
+          { src: url, sizes: '192x192', type: 'image/png' },
+          { src: url, sizes: '512x512', type: 'image/png' }
+        ]
+      };
+      var blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+      document.getElementById('appManifestLink').setAttribute('href', URL.createObjectURL(blob));
+    })
+    .catch(function () {
+      // Diam-diam gagal (mis. offline) — biarkan ikon bawaan browser, jangan
+      // sampai mengganggu iframe utama yang tetap harus tampil.
+    });
 </script>
 
 </body>
