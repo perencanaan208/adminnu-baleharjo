@@ -1,111 +1,111 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistem Administrasi NU Baleharjo</title>
-<meta name="robots" content="noindex, nofollow">
-<!--
-  Ikon aplikasi: favicon tab browser, ikon Home Screen iOS, dan ikon
-  "Buat Pintasan"/"Install" di Android & desktop Chrome. Href-nya SENGAJA
-  dikosongkan di sini — begitu halaman ini dimuat, script kecil di bawah
-  mengambil URL Icon Aplikasi (yang disimpan di Google Drive lewat menu
-  Pengaturan di dalam aplikasi) langsung dari server GAS, lalu mengisi
-  href-nya. Jadi kalau Admin ganti ikon lewat Pengaturan, ikon di sini
-  IKUT BERUBAH otomatis — TIDAK perlu commit/push apapun ke sini lagi.
--->
-<link rel="icon" id="appFaviconLink" href="">
-<link rel="apple-touch-icon" id="appTouchIconLink" href="">
-<link rel="manifest" id="appManifestLink" href="">
-<meta name="theme-color" content="#0f3d24">
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; width: 100%; overflow: hidden; background: #0f3d24; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
-
-  #app-frame { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; display: block; }
-
-  #loader {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: #0f3d24; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 16px; color: #fff; z-index: 10;
-    transition: opacity 0.3s ease;
-  }
-  #loader.hide { opacity: 0; pointer-events: none; }
-  .spinner { width: 42px; height: 42px; border: 4px solid rgba(255,255,255,0.25); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  #loader p { font-size: 14px; opacity: 0.85; }
+<!-- =====================================================================
+  SPLASH "SELAMAT DATANG" ADMIN NU BALEHARJO
+  Tempel SELURUH blok ini di index.html Vercel, TEPAT SEBELUM </body>.
+  Tidak perlu menghapus apa pun: layar ini menutupi pemuat lama, lalu
+  hilang sendiri saat aplikasi Apps Script siap, sehingga aplikasi
+  langsung terbuka. Logo diambil otomatis dari ikon (favicon) halaman.
+====================================================================== -->
+<style id="nuSplashCss">
+  #nuSplash{position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;color:#fff;font-family:'Segoe UI',Roboto,Arial,sans-serif;background:radial-gradient(circle at 50% 36%,#1d5c3b 0%,#123d27 55%,#0b2a1b 100%);transition:opacity .5s ease,visibility .5s ease;}
+  #nuSplash.nu-hide{opacity:0;visibility:hidden;pointer-events:none;}
+  #nuSplash .nu-logo{width:104px;height:104px;border-radius:26px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 34px rgba(0,0,0,.35),0 0 0 6px rgba(201,162,39,.35);animation:nuDenyut 2.2s ease-in-out infinite;overflow:hidden;}
+  #nuSplash .nu-logo img{width:84px;height:84px;object-fit:contain;display:none;}
+  #nuSplash .nu-mono{font-size:38px;font-weight:800;color:#14532d;letter-spacing:1px;}
+  #nuSplash .nu-sapa{margin-top:26px;font-size:clamp(26px,6vw,38px);font-weight:700;letter-spacing:.3px;}
+  #nuSplash .nu-app{margin-top:6px;font-size:clamp(14px,3.6vw,18px);line-height:1.5;opacity:.92;}
+  #nuSplash .nu-app b{display:inline-block;margin-top:2px;font-size:clamp(18px,4.6vw,24px);color:#e3c25a;letter-spacing:.4px;}
+  #nuSplash .nu-bar{width:min(320px,76vw);height:8px;margin-top:30px;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden;}
+  #nuSplash .nu-bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#c9a227,#f0d77a);transition:width .25s ease-out;}
+  #nuSplash .nu-pct{margin-top:12px;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;}
+  #nuSplash .nu-info{margin-top:2px;font-size:13px;opacity:.75;min-height:18px;}
+  #nuSplash .nu-tag{position:absolute;left:0;right:0;bottom:22px;font-size:12px;letter-spacing:.8px;opacity:.55;}
+  @keyframes nuDenyut{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+  @media (prefers-reduced-motion:reduce){#nuSplash .nu-logo{animation:none;}}
 </style>
-</head>
-<body>
 
-  <div id="loader">
-    <div class="spinner"></div>
-    <p id="loaderText">Memuat Sistem Administrasi NU Baleharjo...</p>
+<div id="nuSplash" role="status" aria-live="polite">
+  <div class="nu-logo">
+    <img id="nuSplashLogo" alt="Logo NU">
+    <div class="nu-mono" id="nuSplashMono">NU</div>
   </div>
-
-  <iframe id="app-frame" title="Sistem Administrasi NU Baleharjo" allow="clipboard-write"></iframe>
+  <div class="nu-sapa">Selamat Datang</div>
+  <div class="nu-app">di Sistem Administrasi<br><b>NU Baleharjo</b></div>
+  <div class="nu-bar"><i id="nuSplashBar"></i></div>
+  <div class="nu-pct"><span id="nuSplashPct">0</span>%</div>
+  <div class="nu-info" id="nuSplashInfo">Menghubungkan ke server...</div>
+  <div class="nu-tag">Merawat Jagat Membangun Peradaban</div>
+</div>
 
 <script>
-  var GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwSK9pZh5H18yFqpsTmY29GqoUIeE1HcRUzuVKt8o8OVfIyflLz8AT6jaWZ2bHWp-bUFQ/exec";
-  var TIMEOUT_MS = 10000; // kalau belum kelar dalam 10 detik, otomatis reload
+(function () {
+  var splash = document.getElementById('nuSplash');
+  if (!splash) return;
+  var elPct = document.getElementById('nuSplashPct'), elBar = document.getElementById('nuSplashBar'),
+      elInfo = document.getElementById('nuSplashInfo'), elLogo = document.getElementById('nuSplashLogo'),
+      elMono = document.getElementById('nuSplashMono');
+  var MIN_TAMPIL = 1500, MAKS_TUNGGU = 30000, TUNGGU_SINYAL = 8000;
+  var mulai = Date.now(), target = 0, tampil = 0, iframeMuat = false, waktuIframe = 0, siap = false, selesai = false, adaIframe = false;
 
-  var frame = document.getElementById('app-frame');
-  var loader = document.getElementById('loader');
-  var loaderText = document.getElementById('loaderText');
+  // Logo: pakai ikon halaman yang sudah dipakai tab browser
+  function cariLogo() {
+    if (elLogo.getAttribute('src')) return true;
+    var l = document.querySelector('link[rel~="icon"][href]') || document.querySelector('link[rel="apple-touch-icon"][href]');
+    var h = l && l.getAttribute('href');
+    if (!h) return false;
+    elLogo.onload = function () { elLogo.style.display = 'block'; elMono.style.display = 'none'; };
+    elLogo.src = h;
+    return true;
+  }
 
-  frame.src = GAS_WEB_APP_URL;
-
-  var loaded = false;
-  frame.addEventListener('load', function () {
-    loaded = true;
-    loader.classList.add('hide');
-    setTimeout(function () { loader.style.display = 'none'; }, 350);
-  });
-
-  // Kalau gagal terhubung dalam batas waktu, coba lagi otomatis (reload halaman)
-  setTimeout(function () {
-    if (!loaded) {
-      loaderText.textContent = 'Menghubungkan ulang...';
-      setTimeout(function () { window.location.reload(); }, 600);
-    }
-  }, TIMEOUT_MS);
-
-  // ================= IKON APLIKASI (favicon & "Add to Home Screen") =================
-  // GET biasa (bukan POST) — dijamin tidak kena masalah CORS preflight sama
-  // sekali. Endpoint ?rpc=getIkon cuma mengembalikan JSON kecil berisi URL
-  // Icon Aplikasi terbaru (bukan file gambar), lihat doGet di Code.gs.
-  fetch(GAS_WEB_APP_URL + '?rpc=getIkon')
-    .then(function (r) { return r.json(); })
-    .then(function (res) {
-      var url = res && res.url;
-      if (!url) return; // belum ada ikon custom diupload — biarkan ikon bawaan browser
-
-      document.getElementById('appFaviconLink').setAttribute('href', url);
-      document.getElementById('appTouchIconLink').setAttribute('href', url);
-
-      // Web App Manifest dibuat dinamis lewat Blob URL (bukan file
-      // manifest.json terpisah) — supaya ikon "Add to Home Screen"/"Install
-      // App" di Android Chrome & desktop Chrome ikut memakai ikon terbaru.
-      var manifest = {
-        name: 'Sistem Administrasi NU Baleharjo',
-        short_name: 'SI ADMIN NU',
-        start_url: GAS_WEB_APP_URL,
-        display: 'standalone',
-        background_color: '#0f3d24',
-        theme_color: '#0f3d24',
-        icons: [
-          { src: url, sizes: '192x192', type: 'image/png' },
-          { src: url, sizes: '512x512', type: 'image/png' }
-        ]
-      };
-      var blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-      document.getElementById('appManifestLink').setAttribute('href', URL.createObjectURL(blob));
-    })
-    .catch(function () {
-      // Diam-diam gagal (mis. offline) — biarkan ikon bawaan browser, jangan
-      // sampai mengganggu iframe utama yang tetap harus tampil.
+  function pasangIframe() {
+    var f = document.querySelector('iframe');
+    if (!f) return;
+    adaIframe = true;
+    if (f.__nuPasang) return;
+    f.__nuPasang = true;
+    f.addEventListener('load', function () {
+      var u = f.getAttribute('src') || '';
+      if (!u || u.indexOf('about:blank') === 0) return;
+      if (!iframeMuat) { iframeMuat = true; waktuIframe = Date.now(); }
     });
-</script>
+  }
 
-</body>
-</html>
+  // Sinyal dari aplikasi Apps Script bahwa tampilan sudah siap
+  window.addEventListener('message', function (e) { if (e && e.data === 'nu-app-ready') siap = true; });
+
+  function tulis(p) {
+    elPct.textContent = p;
+    elBar.style.width = p + '%';
+    elInfo.textContent = p >= 100 ? 'Selesai' : p < 30 ? 'Menghubungkan ke server...' : p < 70 ? 'Memuat aplikasi...' : 'Menyiapkan tampilan...';
+  }
+
+  function tutup() {
+    if (selesai) return;
+    selesai = true;
+    clearInterval(timer); clearInterval(timerLogo);
+    tulis(100);
+    splash.classList.add('nu-hide');
+    setTimeout(function () { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 700);
+  }
+
+  function langkah() {
+    if (selesai) return;
+    pasangIframe();
+    var lama = Date.now() - mulai;
+    if (!adaIframe && lama > 6000) siap = true;               // halaman tanpa iframe: jangan menahan layar
+    if (iframeMuat && !siap && Date.now() - waktuIframe > TUNGGU_SINYAL) siap = true;   // aplikasi versi lama tanpa sinyal
+    if (siap) target = 100;
+    else if (iframeMuat) target = Math.min(95, Math.max(target, 70) + 0.3);
+    else target = Math.min(68, target + (68 - target) * 0.03 + 0.15);
+    tampil += (target - tampil) * 0.2;
+    if (target - tampil < 0.5) tampil = target;
+    tulis(Math.floor(tampil));
+    if (siap && tampil >= 99.5 && lama >= MIN_TAMPIL) tutup();
+    else if (lama > MAKS_TUNGGU) tutup();
+  }
+
+  var timer = setInterval(langkah, 100);
+  var timerLogo = setInterval(function () { if (cariLogo() || Date.now() - mulai > 10000) clearInterval(timerLogo); }, 250);
+  cariLogo();
+})();
+</script>
