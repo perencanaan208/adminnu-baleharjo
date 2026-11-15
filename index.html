@@ -1,11 +1,20 @@
-<!-- =====================================================================
-  SPLASH "SELAMAT DATANG" ADMIN NU BALEHARJO
-  Tempel SELURUH blok ini di index.html Vercel, TEPAT SEBELUM </body>.
-  Tidak perlu menghapus apa pun: layar ini menutupi pemuat lama, lalu
-  hilang sendiri saat aplikasi Apps Script siap, sehingga aplikasi
-  langsung terbuka. Logo dikirim aplikasi lalu disimpan di browser, jadi muncul instan di kunjungan berikutnya dan jadi ikon tab.
-====================================================================== -->
-<style id="nuSplashCss">
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sistem Administrasi NU Baleharjo</title>
+<meta name="robots" content="noindex, nofollow">
+<!-- Ikon aplikasi: href diisi otomatis oleh script di bawah (dari ?rpc=getIkon), dan di-cache di browser agar muncul instan. -->
+<link rel="icon" id="appFaviconLink" href="">
+<link rel="apple-touch-icon" id="appTouchIconLink" href="">
+<link rel="manifest" id="appManifestLink" href="">
+<meta name="theme-color" content="#0f3d24">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; width: 100%; overflow: hidden; background: #0f3d24; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
+  #app-frame { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; display: block; background: #fff; }
+
   #nuSplash{position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;color:#fff;font-family:'Segoe UI',Roboto,Arial,sans-serif;background:radial-gradient(circle at 50% 36%,#1d5c3b 0%,#123d27 55%,#0b2a1b 100%);transition:opacity .5s ease,visibility .5s ease;}
   #nuSplash.nu-hide{opacity:0;visibility:hidden;pointer-events:none;}
   #nuSplash .nu-logo{width:104px;height:104px;border-radius:26px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 34px rgba(0,0,0,.35),0 0 0 6px rgba(201,162,39,.35);animation:nuDenyut 2.2s ease-in-out infinite;overflow:hidden;}
@@ -21,121 +30,109 @@
   #nuSplash .nu-tag{position:absolute;left:0;right:0;bottom:22px;font-size:12px;letter-spacing:.8px;opacity:.55;}
   @keyframes nuDenyut{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
   @media (prefers-reduced-motion:reduce){#nuSplash .nu-logo{animation:none;}}
-</style>
 
-<div id="nuSplash" role="status" aria-live="polite">
-  <div class="nu-logo">
-    <img id="nuSplashLogo" alt="Logo NU">
-    <div class="nu-mono" id="nuSplashMono">NU</div>
+  #nuSplash .nu-buka{margin-top:18px;font-size:13px;color:#f0d77a;text-decoration:underline;display:none;}
+</style>
+</head>
+<body>
+
+  <!-- Aplikasi dimuat sejak awal di belakang splash -->
+  <iframe id="app-frame" title="Sistem Administrasi NU Baleharjo" allow="clipboard-write"></iframe>
+
+  <div id="nuSplash" role="status" aria-live="polite">
+    <div class="nu-logo">
+      <img id="nuSplashLogo" alt="Logo NU">
+      <div class="nu-mono" id="nuSplashMono">NU</div>
+    </div>
+    <div class="nu-sapa">Selamat Datang</div>
+    <div class="nu-app">di Sistem Administrasi<br><b>NU Baleharjo</b></div>
+    <div class="nu-bar"><i id="nuSplashBar"></i></div>
+    <div class="nu-pct"><span id="nuSplashPct">0</span>%</div>
+    <div class="nu-info" id="nuSplashInfo">Menghubungkan ke server...</div>
+    <a class="nu-buka" id="nuBukaLangsung" href="#">Tidak terbuka? Klik di sini</a>
+    <div class="nu-tag">Merawat Jagat Membangun Peradaban</div>
   </div>
-  <div class="nu-sapa">Selamat Datang</div>
-  <div class="nu-app">di Sistem Administrasi<br><b>NU Baleharjo</b></div>
-  <div class="nu-bar"><i id="nuSplashBar"></i></div>
-  <div class="nu-pct"><span id="nuSplashPct">0</span>%</div>
-  <div class="nu-info" id="nuSplashInfo">Menghubungkan ke server...</div>
-  <div class="nu-tag">Merawat Jagat Membangun Peradaban</div>
-</div>
 
 <script>
-(function () {
+  var GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwSK9pZh5H18yFqpsTmY29GqoUIeE1HcRUzuVKt8o8OVfIyflLz8AT6jaWZ2bHWp-bUFQ/exec";
+  var TIMEOUT_MS = 12000; // jika iframe belum mulai terhubung dalam 12 detik, muat ulang otomatis
+
+  var frame = document.getElementById('app-frame');
   var splash = document.getElementById('nuSplash');
-  if (!splash) return;
   var elPct = document.getElementById('nuSplashPct'), elBar = document.getElementById('nuSplashBar'),
       elInfo = document.getElementById('nuSplashInfo'), elLogo = document.getElementById('nuSplashLogo'),
-      elMono = document.getElementById('nuSplashMono');
-  var MIN_TAMPIL = 800, MAKS_TUNGGU = 30000, TUNGGU_SINYAL = 20000, KUNCI_LOGO = 'nuSplashLogo';
-  var mulai = Date.now(), target = 0, tampil = 0, iframeMuat = false, waktuIframe = 0, siap = false, selesai = false, adaIframe = false;
+      elMono = document.getElementById('nuSplashMono'), elBuka = document.getElementById('nuBukaLangsung');
+  var MIN_TAMPIL = 800, TUNGGU_SINYAL = 20000, MAKS_TUNGGU = 45000, KUNCI_LOGO = 'nuSplashLogo';
+  var mulai = Date.now(), target = 0, tampil = 0, iframeMuat = false, waktuIframe = 0, siap = false, selesai = false;
 
-  // ---- Logo: dari cache browser (instan), diperbarui oleh kiriman aplikasi ----
-  function pasangFavicon(src) {
-    try {
-      var l = document.querySelector('link[rel~="icon"]');
-      if (!l) { l = document.createElement('link'); l.rel = 'icon'; document.head.appendChild(l); }
-      l.removeAttribute('type'); l.href = src;
-      var a = document.querySelector('link[rel="apple-touch-icon"]');
-      if (!a) { a = document.createElement('link'); a.rel = 'apple-touch-icon'; document.head.appendChild(a); }
-      a.href = src;
-    } catch (e) {}
-  }
-  function tampilLogo(src) {
-    if (!src || elLogo.getAttribute('src') === src) return;
-    elLogo.onload = function () { elLogo.style.display = 'block'; elMono.style.display = 'none'; };
-    elLogo.onerror = function () { elLogo.style.display = 'none'; elMono.style.display = ''; };
-    elLogo.src = src;
-    pasangFavicon(src);
-  }
-  try { tampilLogo(localStorage.getItem(KUNCI_LOGO)); } catch (e) {}
-  function terimaLogo(src) {
-    if (typeof src !== 'string' || !/^(data:image\/|https:\/\/)/.test(src)) return;
-    tampilLogo(src);
-    try { localStorage.setItem(KUNCI_LOGO, src); } catch (e) {}
-  }
+  elBuka.href = GAS_WEB_APP_URL;
+  frame.addEventListener('load', function () { if (!iframeMuat) { iframeMuat = true; waktuIframe = Date.now(); } });
+  frame.src = GAS_WEB_APP_URL;
 
-  function pasangIframe() {
-    var f = document.querySelector('iframe');
-    if (!f) return;
-    adaIframe = true;
-    if (f.__nuPasang) return;
-    f.__nuPasang = true;
-    f.addEventListener('load', function () {
-      var u = f.getAttribute('src') || '';
-      if (!u || u.indexOf('about:blank') === 0) return;
-      if (!iframeMuat) { iframeMuat = true; waktuIframe = Date.now(); }
-    });
-  }
+  // Muat ulang otomatis bila iframe tak kunjung terhubung
+  setTimeout(function () {
+    if (!iframeMuat) { elInfo.textContent = 'Menghubungkan ulang...'; setTimeout(function () { window.location.reload(); }, 600); }
+  }, TIMEOUT_MS);
 
-  // ---- Pesan dari aplikasi Apps Script ----
+  // ================= IKON / LOGO =================
+  function setIkon(url) {
+    if (!url) return;
+    document.getElementById('appFaviconLink').setAttribute('href', url);
+    document.getElementById('appTouchIconLink').setAttribute('href', url);
+    if (elLogo.getAttribute('src') !== url) {
+      elLogo.onload = function () { elLogo.style.display = 'block'; elMono.style.display = 'none'; };
+      elLogo.onerror = function () { elLogo.style.display = 'none'; elMono.style.display = ''; };
+      elLogo.src = url;
+    }
+    var manifest = {
+      name: 'Sistem Administrasi NU Baleharjo', short_name: 'SI ADMIN NU',
+      start_url: GAS_WEB_APP_URL, display: 'standalone',
+      background_color: '#0f3d24', theme_color: '#0f3d24',
+      icons: [ { src: url, sizes: '192x192', type: 'image/png' }, { src: url, sizes: '512x512', type: 'image/png' } ]
+    };
+    var blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+    document.getElementById('appManifestLink').setAttribute('href', URL.createObjectURL(blob));
+  }
+  // 1) dari cache browser -> langsung tampil
+  try { setIkon(localStorage.getItem(KUNCI_LOGO)); } catch (e) {}
+  // 2) dari server (paralel dengan pemuatan aplikasi) -> perbarui bila berubah
+  fetch(GAS_WEB_APP_URL + '?rpc=getIkon')
+    .then(function (r) { return r.json(); })
+    .then(function (res) {
+      var url = res && res.url;
+      if (!url) return;
+      setIkon(url);
+      try { localStorage.setItem(KUNCI_LOGO, url); } catch (e) {}
+    })
+    .catch(function () {});
+
+  // ================= SINYAL DARI APLIKASI =================
   window.addEventListener('message', function (e) {
     var d = e && e.data;
     if (d === 'nu-app-ready') siap = true;
-    else if (d && typeof d === 'object' && d.nu === 'logo') terimaLogo(d.src);
+    else if (d && typeof d === 'object' && d.nu === 'logo' && typeof d.src === 'string' && /^(data:image\/|https:\/\/)/.test(d.src)) {
+      setIkon(d.src);
+      try { localStorage.setItem(KUNCI_LOGO, d.src); } catch (x) {}
+    }
   });
 
+  // ================= SPLASH =================
   function tulis(p) {
-    elPct.textContent = p;
-    elBar.style.width = p + '%';
+    elPct.textContent = p; elBar.style.width = p + '%';
     elInfo.textContent = p >= 100 ? 'Selesai' : p < 30 ? 'Menghubungkan ke server...' : p < 70 ? 'Memuat data...' : 'Menyiapkan tampilan...';
   }
-
-  // Pastikan iframe aplikasi terlihat penuh & pemuat lama tidak menutupi (penyebab layar putih)
-  function tampilkanAplikasi() {
-    var f = document.querySelector('iframe');
-    if (!f) return;
-    var n = f, vw = window.innerWidth, vh = window.innerHeight;
-    while (n && n !== document.body && n !== document.documentElement) {
-      n.style.setProperty('display', n === f ? 'block' : (getComputedStyle(n).display === 'none' ? 'block' : getComputedStyle(n).display), 'important');
-      n.style.setProperty('visibility', 'visible', 'important');
-      n.style.setProperty('opacity', '1', 'important');
-      n = n.parentElement;
-    }
-    var semua = document.body.children, i, el, cs, r;
-    for (i = 0; i < semua.length; i++) {
-      el = semua[i];
-      if (el === splash || el.contains(f) || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') continue;
-      cs = getComputedStyle(el);
-      if (cs.position === 'fixed' || cs.position === 'absolute') {
-        r = el.getBoundingClientRect();
-        if (r.width >= vw * 0.9 && r.height >= vh * 0.9) el.style.setProperty('display', 'none', 'important'); // pemuat lama
-      }
-    }
-  }
-
   function tutup() {
     if (selesai) return;
-    selesai = true;
-    clearInterval(timer);
+    selesai = true; clearInterval(timer);
     tulis(100);
-    tampilkanAplikasi();
     splash.classList.add('nu-hide');
     setTimeout(function () { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 700);
   }
-
   function langkah() {
     if (selesai) return;
-    pasangIframe();
     var lama = Date.now() - mulai;
-    if (!adaIframe && lama > 6000) siap = true;
-    if (iframeMuat && !siap && Date.now() - waktuIframe > TUNGGU_SINYAL) siap = true;
+    if (iframeMuat && !siap && Date.now() - waktuIframe > TUNGGU_SINYAL) siap = true; // aplikasi versi lama tanpa sinyal
+    if (lama > 12000 && !siap) elBuka.style.display = 'inline';
     if (siap) target = 100;
     else if (iframeMuat) target = Math.min(95, Math.max(target, 70) + 0.25);
     else target = Math.min(68, target + (68 - target) * 0.03 + 0.15);
@@ -145,7 +142,8 @@
     if (siap && tampil >= 99.5 && lama >= MIN_TAMPIL) tutup();
     else if (lama > MAKS_TUNGGU) tutup();
   }
-
   var timer = setInterval(langkah, 100);
-})();
 </script>
+
+</body>
+</html>
