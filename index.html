@@ -62,7 +62,7 @@
   var elPct = document.getElementById('nuSplashPct'), elBar = document.getElementById('nuSplashBar'),
       elInfo = document.getElementById('nuSplashInfo'), elLogo = document.getElementById('nuSplashLogo'),
       elMono = document.getElementById('nuSplashMono'), elBuka = document.getElementById('nuBukaLangsung');
-  var MIN_TAMPIL = 800, TUNGGU_SINYAL = 20000, MAKS_TUNGGU = 45000, KUNCI_LOGO = 'nuSplashLogo';
+  var MIN_TAMPIL = 800, TUNGGU_SINYAL = 20000, MAKS_TUNGGU = 45000, KUNCI_LOGO = 'nuSplashLogoNU';
   var mulai = Date.now(), target = 0, tampil = 0, iframeMuat = false, waktuIframe = 0, siap = false, selesai = false;
 
   elBuka.href = GAS_WEB_APP_URL;
@@ -79,11 +79,6 @@
     if (!url) return;
     document.getElementById('appFaviconLink').setAttribute('href', url);
     document.getElementById('appTouchIconLink').setAttribute('href', url);
-    if (elLogo.getAttribute('src') !== url) {
-      elLogo.onload = function () { elLogo.style.display = 'block'; elMono.style.display = 'none'; };
-      elLogo.onerror = function () { elLogo.style.display = 'none'; elMono.style.display = ''; };
-      elLogo.src = url;
-    }
     var manifest = {
       name: 'Sistem Administrasi NU Baleharjo', short_name: 'SI ADMIN NU',
       start_url: GAS_WEB_APP_URL, display: 'standalone',
@@ -93,8 +88,15 @@
     var blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
     document.getElementById('appManifestLink').setAttribute('href', URL.createObjectURL(blob));
   }
-  // 1) dari cache browser -> langsung tampil
-  try { setIkon(localStorage.getItem(KUNCI_LOGO)); } catch (e) {}
+  // Logo splash = logo NU di bar atas aplikasi (dikirim aplikasi, lalu di-cache agar instan di kunjungan berikutnya)
+  function setLogoNU(src) {
+    if (!src || elLogo.getAttribute('src') === src) return;
+    elLogo.onload = function () { elLogo.style.display = 'block'; elMono.style.display = 'none'; };
+    elLogo.onerror = function () { elLogo.style.display = 'none'; elMono.style.display = ''; };
+    elLogo.src = src;
+  }
+  try { setLogoNU(localStorage.getItem(KUNCI_LOGO)); } catch (e) {}
+  try { setIkon(localStorage.getItem('nuIkonApp')); } catch (e) {}
   // 2) dari server (paralel dengan pemuatan aplikasi) -> perbarui bila berubah
   fetch(GAS_WEB_APP_URL + '?rpc=getIkon')
     .then(function (r) { return r.json(); })
@@ -102,7 +104,7 @@
       var url = res && res.url;
       if (!url) return;
       setIkon(url);
-      try { localStorage.setItem(KUNCI_LOGO, url); } catch (e) {}
+      try { localStorage.setItem('nuIkonApp', url); } catch (e) {}
     })
     .catch(function () {});
 
@@ -111,7 +113,7 @@
     var d = e && e.data;
     if (d === 'nu-app-ready') siap = true;
     else if (d && typeof d === 'object' && d.nu === 'logo' && typeof d.src === 'string' && /^(data:image\/|https:\/\/)/.test(d.src)) {
-      setIkon(d.src);
+      setLogoNU(d.src);
       try { localStorage.setItem(KUNCI_LOGO, d.src); } catch (x) {}
     }
   });
