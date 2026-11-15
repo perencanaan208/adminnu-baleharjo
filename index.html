@@ -3,7 +3,7 @@
   Tempel SELURUH blok ini di index.html Vercel, TEPAT SEBELUM </body>.
   Tidak perlu menghapus apa pun: layar ini menutupi pemuat lama, lalu
   hilang sendiri saat aplikasi Apps Script siap, sehingga aplikasi
-  langsung terbuka. Logo diambil otomatis dari ikon (favicon) halaman.
+  langsung terbuka. Logo dikirim aplikasi lalu disimpan di browser, jadi muncul instan di kunjungan berikutnya dan jadi ikon tab.
 ====================================================================== -->
 <style id="nuSplashCss">
   #nuSplash{position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;color:#fff;font-family:'Segoe UI',Roboto,Arial,sans-serif;background:radial-gradient(circle at 50% 36%,#1d5c3b 0%,#123d27 55%,#0b2a1b 100%);transition:opacity .5s ease,visibility .5s ease;}
@@ -43,18 +43,32 @@
   var elPct = document.getElementById('nuSplashPct'), elBar = document.getElementById('nuSplashBar'),
       elInfo = document.getElementById('nuSplashInfo'), elLogo = document.getElementById('nuSplashLogo'),
       elMono = document.getElementById('nuSplashMono');
-  var MIN_TAMPIL = 1500, MAKS_TUNGGU = 30000, TUNGGU_SINYAL = 8000;
+  var MIN_TAMPIL = 800, MAKS_TUNGGU = 30000, TUNGGU_SINYAL = 20000, KUNCI_LOGO = 'nuSplashLogo';
   var mulai = Date.now(), target = 0, tampil = 0, iframeMuat = false, waktuIframe = 0, siap = false, selesai = false, adaIframe = false;
 
-  // Logo: pakai ikon halaman yang sudah dipakai tab browser
-  function cariLogo() {
-    if (elLogo.getAttribute('src')) return true;
-    var l = document.querySelector('link[rel~="icon"][href]') || document.querySelector('link[rel="apple-touch-icon"][href]');
-    var h = l && l.getAttribute('href');
-    if (!h) return false;
+  // ---- Logo: dari cache browser (instan), diperbarui oleh kiriman aplikasi ----
+  function pasangFavicon(src) {
+    try {
+      var l = document.querySelector('link[rel~="icon"]');
+      if (!l) { l = document.createElement('link'); l.rel = 'icon'; document.head.appendChild(l); }
+      l.removeAttribute('type'); l.href = src;
+      var a = document.querySelector('link[rel="apple-touch-icon"]');
+      if (!a) { a = document.createElement('link'); a.rel = 'apple-touch-icon'; document.head.appendChild(a); }
+      a.href = src;
+    } catch (e) {}
+  }
+  function tampilLogo(src) {
+    if (!src || elLogo.getAttribute('src') === src) return;
     elLogo.onload = function () { elLogo.style.display = 'block'; elMono.style.display = 'none'; };
-    elLogo.src = h;
-    return true;
+    elLogo.onerror = function () { elLogo.style.display = 'none'; elMono.style.display = ''; };
+    elLogo.src = src;
+    pasangFavicon(src);
+  }
+  try { tampilLogo(localStorage.getItem(KUNCI_LOGO)); } catch (e) {}
+  function terimaLogo(src) {
+    if (typeof src !== 'string' || !/^(data:image\/|https:\/\/)/.test(src)) return;
+    tampilLogo(src);
+    try { localStorage.setItem(KUNCI_LOGO, src); } catch (e) {}
   }
 
   function pasangIframe() {
@@ -70,20 +84,48 @@
     });
   }
 
-  // Sinyal dari aplikasi Apps Script bahwa tampilan sudah siap
-  window.addEventListener('message', function (e) { if (e && e.data === 'nu-app-ready') siap = true; });
+  // ---- Pesan dari aplikasi Apps Script ----
+  window.addEventListener('message', function (e) {
+    var d = e && e.data;
+    if (d === 'nu-app-ready') siap = true;
+    else if (d && typeof d === 'object' && d.nu === 'logo') terimaLogo(d.src);
+  });
 
   function tulis(p) {
     elPct.textContent = p;
     elBar.style.width = p + '%';
-    elInfo.textContent = p >= 100 ? 'Selesai' : p < 30 ? 'Menghubungkan ke server...' : p < 70 ? 'Memuat aplikasi...' : 'Menyiapkan tampilan...';
+    elInfo.textContent = p >= 100 ? 'Selesai' : p < 30 ? 'Menghubungkan ke server...' : p < 70 ? 'Memuat data...' : 'Menyiapkan tampilan...';
+  }
+
+  // Pastikan iframe aplikasi terlihat penuh & pemuat lama tidak menutupi (penyebab layar putih)
+  function tampilkanAplikasi() {
+    var f = document.querySelector('iframe');
+    if (!f) return;
+    var n = f, vw = window.innerWidth, vh = window.innerHeight;
+    while (n && n !== document.body && n !== document.documentElement) {
+      n.style.setProperty('display', n === f ? 'block' : (getComputedStyle(n).display === 'none' ? 'block' : getComputedStyle(n).display), 'important');
+      n.style.setProperty('visibility', 'visible', 'important');
+      n.style.setProperty('opacity', '1', 'important');
+      n = n.parentElement;
+    }
+    var semua = document.body.children, i, el, cs, r;
+    for (i = 0; i < semua.length; i++) {
+      el = semua[i];
+      if (el === splash || el.contains(f) || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') continue;
+      cs = getComputedStyle(el);
+      if (cs.position === 'fixed' || cs.position === 'absolute') {
+        r = el.getBoundingClientRect();
+        if (r.width >= vw * 0.9 && r.height >= vh * 0.9) el.style.setProperty('display', 'none', 'important'); // pemuat lama
+      }
+    }
   }
 
   function tutup() {
     if (selesai) return;
     selesai = true;
-    clearInterval(timer); clearInterval(timerLogo);
+    clearInterval(timer);
     tulis(100);
+    tampilkanAplikasi();
     splash.classList.add('nu-hide');
     setTimeout(function () { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 700);
   }
@@ -92,12 +134,12 @@
     if (selesai) return;
     pasangIframe();
     var lama = Date.now() - mulai;
-    if (!adaIframe && lama > 6000) siap = true;               // halaman tanpa iframe: jangan menahan layar
-    if (iframeMuat && !siap && Date.now() - waktuIframe > TUNGGU_SINYAL) siap = true;   // aplikasi versi lama tanpa sinyal
+    if (!adaIframe && lama > 6000) siap = true;
+    if (iframeMuat && !siap && Date.now() - waktuIframe > TUNGGU_SINYAL) siap = true;
     if (siap) target = 100;
-    else if (iframeMuat) target = Math.min(95, Math.max(target, 70) + 0.3);
+    else if (iframeMuat) target = Math.min(95, Math.max(target, 70) + 0.25);
     else target = Math.min(68, target + (68 - target) * 0.03 + 0.15);
-    tampil += (target - tampil) * 0.2;
+    tampil += (target - tampil) * (siap ? 0.45 : 0.2);
     if (target - tampil < 0.5) tampil = target;
     tulis(Math.floor(tampil));
     if (siap && tampil >= 99.5 && lama >= MIN_TAMPIL) tutup();
@@ -105,7 +147,5 @@
   }
 
   var timer = setInterval(langkah, 100);
-  var timerLogo = setInterval(function () { if (cariLogo() || Date.now() - mulai > 10000) clearInterval(timerLogo); }, 250);
-  cariLogo();
 })();
 </script>
